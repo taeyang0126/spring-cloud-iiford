@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.lei.cloud</groupId>
+        <artifactId>spring-cloud-iiford</artifactId>
+        <version>${reversion}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>spring-cloud-webmvc</artifactId>
+    <description>针对基于同步 spring-mvc 的微服务的依赖</description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.lei.cloud</groupId>
+            <artifactId>spring-cloud-common</artifactId>
+            <version>${reversion}</version>
+        </dependency>
+
+        <!--
+            使用 undertow 作为我们的 web 容器
+            undertow可以使用直接内存，减少拷贝，减少gc
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+
+        <!--
+        使用 webflux 相关异步接口，某些微服务主要基于同步接口，但有一些特殊的接口使用的异步响应式实现，
+        这个并不会发生冲突，所以在这里我们也添加了 web-flux 依赖
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!--
+            使用 OpenFeign 作为同步微服务调用客户端，OpenFeign 目前主要还是作为同步客户端使用，
+            虽然目前也有异步实现，但是功能与粘合代码还不完整，异步的我们还是会使用 WebClient
+        -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <!--粘合 OpenFeign 与 resilience4j 的代码依赖-->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-feign</artifactId>
+        </dependency>
+
+
+    </dependencies>
+
+
+</project>

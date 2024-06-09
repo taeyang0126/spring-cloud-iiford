@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.lei.cloud</groupId>
+        <artifactId>spring-cloud-iiford</artifactId>
+        <version>${reversion}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>spring-cloud-common</artifactId>
+    <description>
+        1. spring-framework-common 的依赖
+        2. 同步与异步微服务公共的依赖
+        3. 同步与异步微服务公共的框架代码改造
+    </description>
+
+    <dependencies>
+
+        <!--spring-framework-common-->
+        <dependency>
+            <groupId>com.lei.cloud</groupId>
+            <artifactId>spring-framework-common</artifactId>
+            <version>${reversion}</version>
+        </dependency>
+
+        <!--
+            启用 Spring Cloud 的 Bootstrap Context：在 Spring Cloud 2020.0.x 版本开始，Bootstrap Context 默认不再启用。
+            我们的项目，某些模块使用了 spring-cloud-config，这个是需要启用 Bootstrap Context 的。同时，我们的配置，
+            还通过 bootstrap.yml 与 application.yml 区分了不同配置，如果多环境中配置是一样并且基本不会动态更改的则放入
+            bootstrap.yml，不同环境不同或者可能动态修改则放入 application.yml。所以通过加入如下依赖来启用
+        -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+
+        <!--eureka作为注册中心-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--不使用 Ribbon，使用 Spring Cloud LoadBalancer 作为我们的负载均衡器-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-loadbalancer</artifactId>
+        </dependency>
+
+        <!--使用 resilience4j 作为重试、断路、限并发、限流的组件基础-->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-cloud2</artifactId>
+        </dependency>
+
+        <!--暴露 actuator 相关端口-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!--使用 prometheus 进行指标监控采集-->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

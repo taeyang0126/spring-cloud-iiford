@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <Properties>
+        <Property name="springAppName">mall-order</Property>
+        <Property name="LOG_ROOT">log</Property>
+        <Property name="LOG_DATEFORMAT_PATTERN">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <!--对于日志级别，为了日志能对齐好看，我们占 5 个字符-->
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <!--
+            traceId:
+            spanId:
+        -->
+        <Property name="logFormat">
+            %d{${LOG_DATEFORMAT_PATTERN}} ${LOG_LEVEL_PATTERN} [${springAppName},%X{traceId},%X{spanId}] [${sys:PID}] [%t][%C:%L]: %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}
+        </Property>
+    </Properties>
+    <appenders>
+        <Console name="console" target="SYSTEM_OUT" immediateFlush="false">
+            <PatternLayout pattern="${logFormat}"/>
+        </Console>
+        <RollingFile name="file" append="true"
+                     filePattern="${LOG_ROOT}/app.log-%d{yyyy.MM.dd.HH}"
+                     immediateFlush="false">
+            <PatternLayout pattern="${logFormat}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DirectWriteRolloverStrategy maxFiles="72"/>
+        </RollingFile>
+    </appenders>
+
+
+    <loggers>
+        <!--default logger -->
+
+        <!--
+            immediateFlush=false
+            关闭 immediateFlush，可以减少硬盘 IO，会先写入内存 Buffer（默认是 8 KB），
+            之后在 RingBuffer 目前消费完或者 Buffer 写满的时候才会刷盘
+        -->
+
+        <!--
+            includeLocation=false 无法看到日志属于的代码以及行数
+            获取这个代码行数，其实是通过获取当前调用堆栈实现的。Java 9 之前是通过 new 一个 Exception 获取堆栈，
+            Java 9 之后是通过 StackWalker。两者其实都有性能问题，在高并发的情况下，会吃掉很多 CPU，得不偿失。
+            所以我推荐，在日志内容中直接体现所在代码行数，就不通过这个 includeLocation 获取当前堆栈从而获取代码行数了
+        -->
+
+        <!--default logger -->
+        <Asyncroot level="info" includeLocation="true">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file" />
+        </Asyncroot>
+        <AsyncLogger name="RocketmqClient" level="error" additivity="false" includeLocation="true">
+            <appender-ref ref="console"/>
+        </AsyncLogger>
+        <AsyncLogger name="com.alibaba.druid.pool.DruidDataSourceStatLoggerImpl" level="error" additivity="false" includeLocation="true">
+            <appender-ref ref="console"/>
+        </AsyncLogger>
+        <AsyncLogger name="org.mybatis" level="error" additivity="false" includeLocation="true">
+            <appender-ref ref="console"/>
+        </AsyncLogger>
+    </loggers>
+</configuration>

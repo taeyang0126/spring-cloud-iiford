@@ -1,0 +1,77 @@
+management:
+  endpoints:
+    # 通过jmx暴露
+    jmx:
+      exposure:
+        include: "*"
+    # 通过http暴露
+    web:
+      exposure:
+        include:
+        - health
+        - prometheus
+        - loggers
+server:
+  undertow:
+    # 是否分配的直接内存(NIO直接分配的堆外内存)，这里开启，所以java启动参数需要配置下直接内存大小，减少不必要的GC
+    # 在内存大于 128 MB 时，默认就是使用直接内存的
+    directBuffers: true
+    # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作
+    # 如果每次需要 ByteBuffer 的时候都去申请，对于堆内存的 ByteBuffer 需要走 JVM 内存分配流程（TLAB -> 堆），对于直接内存则需要走系统调用，这样效率是很低下的。
+    # 所以，一般都会引入内存池。在这里就是 `BufferPool`。
+    # 目前，UnderTow 中只有一种 `DefaultByteBufferPool`，其他的实现目前没有用。
+    # 这个 DefaultByteBufferPool 相对于 netty 的 ByteBufArena 来说，非常简单，类似于 JVM TLAB 的机制
+    # 对于 bufferSize，最好和你系统的 TCP Socket Buffer 配置一样
+    # `/proc/sys/net/ipv4/tcp_rmem` (对于读取)
+    # `/proc/sys/net/ipv4/tcp_wmem` (对于写入)
+    # 在内存大于 128 MB 时，bufferSize 为 16 KB 减去 20 字节，这 20 字节用于协议头
+    # 16384 - 20
+    buffer-size: 16364
+    threads:
+      # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个读线程和一个写线程
+      io: 16
+      # 阻塞任务线程池, 当执行类似servlet请求阻塞IO操作, undertow会从这个线程池中取得线程
+      # 它的值设置取决于系统线程执行任务的阻塞系数，默认值是IO线程数*8
+      # 此参数配置越大，同一时间能处理的请求就越多，当然系统开销就越大
+      worker: 256
+    # access log相关配置
+    accesslog:
+      # 存放目录，默认为 logs
+      dir: ./log
+      # 是否开启
+      enabled: true
+      # 格式，各种占位符后面会详细说明
+      pattern: '{
+                  "transportProtocol":"%{TRANSPORT_PROTOCOL}",
+                  "scheme":"%{SCHEME}",
+                  "protocol":"%{PROTOCOL}",
+                  "method":"%{METHOD}",
+                  "reqHeaderUserAgent":"%{i,User-Agent}",
+                  "cookieUserId": "%{c,userId}",
+                  "queryTest": "%{q,test}",
+                  "queryString": "%q",
+                  "relativePath": "%R, %{REQUEST_PATH}, %{RESOLVED_PATH}",
+                  "requestLine": "%r",
+                  "uri": "%U",
+                  "thread": "%I",
+                  "hostPort": "%{HOST_AND_PORT}",
+                  "localIp": "%A",
+                  "localPort": "%p",
+                  "localServerName": "%v",
+                  "remoteIp": "%a",
+                  "remoteHost": "%h",
+                  "bytesSent": "%b",
+                  "time":"%{time,yyyy-MM-dd HH:mm:ss.S}",
+                  "status":"%s",
+                  "reason":"%{RESPONSE_REASON_PHRASE}",
+                  "respHeaderUserSession":"%{o,userSession}",
+                  "respCookieUserId":"%{resp-cookie,userId}",
+                  "timeUsed":"%Dms, %Ts, %{RESPONSE_TIME}ms, %{RESPONSE_TIME_MICROS} us, %{RESPONSE_TIME_NANOS} ns",
+                }'
+      # 文件前缀，默认为 access_log
+      prefix: access.
+      # 文件后缀，默认为 log
+      suffix: log
+      # 是否另起日志文件写 access log，默认为 true
+      # 目前只能按照日期进行 rotate，一天一个日志文件
+      rotate: true
