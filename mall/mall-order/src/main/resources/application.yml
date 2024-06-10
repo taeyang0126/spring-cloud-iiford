@@ -1,3 +1,22 @@
+spring:
+  application:
+    name: mall-order
+
+  cloud:
+    # 服务发现地址
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: a3205a37-91f6-4177-b229-048b52b4f12d
+        group: dev
+        # 元数据
+        metadata:
+          # 这里定义的是服务的元数据，这样其他服务在访问时能判断当前服务所属的zone
+          zone: ${spring.cloud.loadbalancer.zone}
+    # 定义zone
+    loadbalancer:
+      zone: us
+
 management:
   endpoints:
     # 通过jmx暴露
@@ -12,6 +31,7 @@ management:
         - prometheus
         - loggers
 server:
+  port: 8001
   undertow:
     # 是否分配的直接内存(NIO直接分配的堆外内存)，这里开启，所以java启动参数需要配置下直接内存大小，减少不必要的GC
     # 在内存大于 128 MB 时，默认就是使用直接内存的
@@ -75,3 +95,4 @@ server:
       # 是否另起日志文件写 access log，默认为 true
       # 目前只能按照日期进行 rotate，一天一个日志文件
       rotate: true
+

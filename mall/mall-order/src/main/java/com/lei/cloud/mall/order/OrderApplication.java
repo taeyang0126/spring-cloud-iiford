@@ -5,12 +5,11 @@ import brave.Tracer;
 import brave.propagation.TraceContext;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.netflix.eureka.EurekaClientAutoConfiguration;
-import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClientConfiguration;
-import org.springframework.cloud.netflix.eureka.reactive.EurekaReactiveDiscoveryClientConfiguration;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,16 +25,15 @@ import java.util.concurrent.TimeUnit;
  *
  * @author 伍磊
  */
-@SpringBootApplication(exclude = {
-        // 排除eureka
-        EurekaReactiveDiscoveryClientConfiguration.class,
-        EurekaDiscoveryClientConfiguration.class,
-        EurekaClientAutoConfiguration.class
-})
+@SpringBootApplication
 @Log4j2
 @RestController
 @RequestMapping("/order")
+@EnableDiscoveryClient
 public class OrderApplication implements CommandLineRunner {
+
+    @Value("${server.port}")
+    private String serverPort;
 
     @Autowired
     private Tracer tracer;
@@ -59,9 +57,9 @@ public class OrderApplication implements CommandLineRunner {
         }).start();
 
         // 请求外部服务
-        restTemplate.getForEntity("http://localhost:8080/order/health1", String.class);
+        restTemplate.getForEntity("http://mall-order/order/health1", String.class);
 
-        return "OK";
+        return serverPort;
     }
 
     @GetMapping("/health1")

@@ -78,8 +78,8 @@ public class CommonNameContextTest {
         assertEquals(service2CommonBean.name, "service2");
 
         // 4. 验证子上下文与默认配置出现冲突时的场景
-        // 默认的配置优先级高于自定义的
-
+        // 1. 默认的配置优先级高于自定义的，也就是说对于同一个bean来说，DefaultConfig中的定义的bean的优先级会高于子上下文中定义的bean，即获取到bean会是DefaultConfig中定义的bean
+        // 2. 增加@ConditionOnMissBean 注解时，由于子上下文中已经定义了bean，那么DefaultConfig就不会定义bean，获取到的bean就是子上下文中定义的bean
     }
 
     @Configuration

@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    # 定义zone
+    loadbalancer:
+      zone: cn
+
+server:
+  port: 8002
