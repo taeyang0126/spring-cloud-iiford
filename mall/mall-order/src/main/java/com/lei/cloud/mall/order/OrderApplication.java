@@ -3,6 +3,7 @@ package com.lei.cloud.mall.order;
 import brave.Span;
 import brave.Tracer;
 import brave.propagation.TraceContext;
+import com.lei.cloud.mall.order.loadbalance.order.CustomOrderLoadBalanceConfiguration;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/order")
 @EnableDiscoveryClient
+//@LoadBalancerClient(name = "mall-order", configuration = CustomOrderLoadBalanceConfiguration.class)
 public class OrderApplication implements CommandLineRunner {
 
     @Value("${server.port}")
@@ -57,9 +61,8 @@ public class OrderApplication implements CommandLineRunner {
         }).start();
 
         // 请求外部服务
-        restTemplate.getForEntity("http://mall-order/order/health1", String.class);
-
-        return serverPort;
+        ResponseEntity<String> forEntity = restTemplate.getForEntity("http://mall-order/order/health1", String.class);
+        return forEntity.getBody();
     }
 
     @GetMapping("/health1")
@@ -67,7 +70,7 @@ public class OrderApplication implements CommandLineRunner {
         TraceContext context = tracer.currentSpan().context();
         log.info("health1....{}", context);
         TimeUnit.MILLISECONDS.sleep(ThreadLocalRandom.current().nextInt(950, 1050));
-        return "ok1!";
+        return serverPort;
     }
 
     @Override
